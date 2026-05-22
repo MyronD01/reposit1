@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Finder</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 20px; background: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 450px; margin: auto; }
+        h2 { color: #333; text-align: center; margin-bottom: 20px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 18px; box-sizing: border-box; }
+        .search-btn { width: 100%; padding: 15px; background: #007AFF; color: white; font-weight: bold; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; }
+        
+        #result { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border-left: 5px solid #007AFF; 
+            border-radius: 8px; 
+            display: none; 
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        .label { font-weight: bold; color: #666; display: block; margin-top: 10px; font-size: 0.9em; text-transform: uppercase; }
+        .address-text { font-size: 1.1em; color: #222; display: block; margin-bottom: 15px; }
+        
+        .call-btn { 
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            padding: 12px 0;
+            background: #34C759; 
+            color: white; 
+            text-decoration: none; 
+            font-weight: bold; 
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>EMI Directory</h2>
+    <input type="number" id="keyword" placeholder="Enter ID (3804)" inputmode="numeric">
+    <button class="search-btn" onclick="searchData()">Search Address</button>
+    <div id="result"></div>
+</div>
+
+<script>
+    // Paste all 300 lines between the backticks below
+    const emiData = `3801 Amelia 825 Ohio Pike Cincinnati, OH 45245 513-522-1234
+3802 Colerain 8605 Colerain Ave. Cincinnati, OH 45251 513-385-1234
+3803 Fairfield 5389 Dixie Hwy Fairfield, OH 45014 513-829-1234
+3804 TriCounty 11375 Princeton Pike Cincinnati, OH 45246 513-771-1234`;
+
+    function searchData() {
+        const keyword = document.getElementById('keyword').value.trim();
+        const resultDiv = document.getElementById('result');
+
+        if (!keyword) {
+            alert("Please enter an ID number.");
+            return;
+        }
+
+        const lines = emiData.split('\n');
+        let found = false;
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            
+            if (line.startsWith(keyword)) {
+                // Remove the keyword from the display
+                let content = line.substring(keyword.length).trim();
+                
+                // Find phone number (matches formats like 513-123-4567)
+                const phoneMatch = content.match(/(\d{3}-\d{3}-\d{4})/);
+                let callButtonHtml = "";
+                
+                if (phoneMatch) {
+                    const rawPhone = phoneMatch[0];
+                    callButtonHtml = `<a href="tel:${rawPhone}" class="call-btn">📞 Call ${rawPhone}</a>`;
+                    // Clean phone number out of the address text for cleaner look
+                    content = content.replace(rawPhone, "").trim();
+                }
+
+                resultDiv.style.display = "block";
+                resultDiv.innerHTML = `
+                    <span class="label">Store ID:</span> ${keyword}
+                    <span class="label">Location:</span>
+                    <span class="address-text">${content}</span>
+                    ${callButtonHtml}
+                `;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = "❌ ID not found in database.";
+        }
+    }
+</script>
+
+</body>
+</html>
